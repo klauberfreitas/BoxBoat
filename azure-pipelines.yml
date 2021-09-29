@@ -1,0 +1,64 @@
+# Yaml versão 2.0 - Pipelines Template
+# 10/06/2021
+# Dúvidas? Entre em contato com Klauber Lage
+
+#Copiar este arquivo para o root dos projetos.
+resources:
+  repositories:
+    - repository: templatesBDMG
+      type: git
+      name: Arquitetura/bdmg-pipelines
+
+trigger: none
+
+variables:
+  - template: pipeline_variables.yml@templatesBDMG
+
+stages:
+- stage: PurgeTasker
+  displayName: ACR Purge Tasker
+  jobs:
+    - job: ACRPurgeTasker
+      steps: 
+        - task: NodeTool@0
+          displayName: Node Version Manager
+          inputs:
+            versionSpec: 12.22.1
+
+        - task: Npm@1
+          displayName: Npm Install
+          inputs:
+            command: custom
+            workingDir: ""
+            verbose: false
+            customCommand: "install --save"
+
+        - task: Bash@3
+          displayName: Echo General Diagnostics
+          inputs:
+              targetType: "inline" 
+              script: "
+                az login --service-principal -u fcf1d4de-222e-4e16-998c-9cb1bb891648 -p JgEByVp9WlEG8yWsybyiHyePWVmG~tPSeG -t 87706aaa-22dc-4382-aafd-e2209734bdb5
+                npm start -- check azure -g rg-dese-aks -n dese
+                " 
+
+        - task: Bash@3
+          displayName: Echo General Diagnostics
+          inputs:
+              targetType: "inline" 
+              script: "
+                npm start -- check azure -g rg-dese-aks -n dese
+                " 
+
+        # - task: AzureCLI@2
+        #   displayName: ACR Image Purger
+        #   inputs:
+        #     azureSubscription: $(azureResourceManager)
+        #     scriptType: bash
+        #     scriptLocation: inlineScript
+        #     inlineScript: aks-hc check all -g rg-dese-aks -n aks-dese -i ingress-nginx,kube-node-lease,kube-public,kube-system,dese
+
+
+  
+      
+ 
